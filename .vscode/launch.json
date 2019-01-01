@@ -1,0 +1,66 @@
+// {
+//   // Use IntelliSense to learn about possible attributes.
+//   // Hover to view descriptions of existing attributes.
+//   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "cwd": "${workspaceRoot}",
+//       "executable": "./BUILD/LCDMenu.elf",
+//       "name": "Debug Microcontroller",
+//       "request": "launch",
+//       "type": "cortex-debug",
+//       "servertype": "openocd"
+//     }
+//   ]
+// }
+
+
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Debug",
+      "type": "cppdbg",
+      // "type": "cortex-debug",
+      "request": "launch",
+      "miDebuggerPath": "/Users/rueloquindo/gcc-arm-none-eabi/bin/arm-none-eabi-gdb",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/BUILD/LCDMenu.elf",
+      "stopAtEntry": false,
+      "windows": {
+        "MIMode": "gdb",
+        "miDebuggerPath": "/Users/rueloquindo/gcc-arm-none-eabi/bin/arm-none-eabi-gdb",
+        "customLaunchSetupCommands": [
+          {
+            "text": "cd ${workspaceRoot}"
+          },
+          {
+            "text": "target remote localhost:3333",
+            "description": "connect to remote target",
+            "ignoreFailures": false
+          },
+          {
+            "text": "monitor reset halt",
+            "description": "halt",
+            "ignoreFailures": false
+          },
+          {
+            "text": "file ${workspaceRoot}/BUILD/LCDMenu.elf",
+            "description": "load symbols",
+            "ignoreFailures": false
+          },
+          {
+            "text": "load",
+            "description": "load to remote MCU",
+            "ignoreFailures": false
+          }
+        ]
+      },
+    }
+  ]
+}
