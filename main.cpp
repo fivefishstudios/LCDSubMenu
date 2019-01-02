@@ -7,7 +7,6 @@
 #include "LCDMenu.h"
 #include "LCD_DISCO_F429ZI.h"
 #include "PinDetect.h" // URL: http://mbed.org/users/AjK/libraries/PinDetect
-
 using namespace std;
 
 uint8_t MachineState = 0;
@@ -52,24 +51,12 @@ void MenuOne_Function()
   MenuOptions[3].callback_function = &Do_Nothing;
 
   strcpy(MenuOptions[4].MenuText, "< Back to Home");
-  MenuOptions[4].callback_function = &MenuHome_Function;
-
-  // strcpy(MenuOptions[5].MenuText, "6a SubMenu fff");
-  // MenuOptions[5].callback_function = &Do_Nothing;
-
-  // strcpy(MenuOptions[6].MenuText, "7a SubMenu ggg");
-  // MenuOptions[6].callback_function = &Do_Nothing;
-
-  // strcpy(MenuOptions[7].MenuText, "8a Back to Home");
-  // MenuOptions[7].callback_function = &MenuHome_Function;            
+  MenuOptions[4].callback_function = &MenuHome_Function;       
 
   totalMenuCount = 5;
   mainMenuOffset = 0;
   mainMenuPosition = 1;  
 
-  // these next 2 functions control the logic of the menu display
-  // DisplayMenuOptions(mainMenuOffset);
-  // HighlightMenuOption(mainMenuOffset, mainMenuPosition);  
   UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
 }
 
@@ -80,7 +67,27 @@ void MenuTwo_Function()
 
 void MenuThree_Function()
 {
-  lcd.Clear(LCD_COLOR_YELLOW);
+  // Display submenu for Menu Item 3 (CCCC)
+  // To do that, we need to replace the MenuOptions[] array with new items and callback functions 
+  MachineState = 3;
+
+  strcpy(MenuOptions[0].MenuText, "3a Sub333 aaa");
+  MenuOptions[0].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[1].MenuText, "3b Sub333 bbb");
+  MenuOptions[1].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[2].MenuText, "3c Sub333 ccc");
+  MenuOptions[2].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[3].MenuText, "< Back to Home");
+  MenuOptions[3].callback_function = &MenuHome_Function;  
+
+  totalMenuCount = 4;
+  mainMenuOffset = 0;
+  mainMenuPosition = 1;  
+
+  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
 }
 
 void MenuFour_Function()
@@ -96,39 +103,38 @@ void MenuHome_Function(){
   MenuOptions[0].callback_function = &MenuOne_Function;
 
   strcpy(MenuOptions[1].MenuText, "2 Menu BBBB");
-  MenuOptions[1].callback_function = &MenuTwo_Function;
+  MenuOptions[1].callback_function = &Do_Nothing;
 
-  strcpy(MenuOptions[2].MenuText, "3 Menu CCCC");
+  strcpy(MenuOptions[2].MenuText, "3 Menu CCCC    >");
   MenuOptions[2].callback_function = &MenuThree_Function;  
 
   strcpy(MenuOptions[3].MenuText, "4 Menu DDDD");
-  MenuOptions[3].callback_function = &MenuFour_Function;  
+  MenuOptions[3].callback_function = &Do_Nothing;  
 
   strcpy(MenuOptions[4].MenuText, "5 Menu EEEE");
-  MenuOptions[4].callback_function = &MenuThree_Function;  
+  MenuOptions[4].callback_function = &Do_Nothing;  
 
   totalMenuCount = 5;    
   mainMenuOffset = 0;
   mainMenuPosition = 1;    
 
-  // these next 2 functions control the logic of the menu display
-  // DisplayMenuOptions(mainMenuOffset);
-  // HighlightMenuOption(mainMenuOffset, mainMenuPosition);
   UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
-
 }
-
-
 
 
 void SwitchHandler()
 {
-  led2 = !led2;
-  greenLed = !greenLed;
   // if button pressed, we need to determine which menu item is currently highlighted
   // then execute a callback function for that menu item
   // MenuOptions[mainMenuOffset + mainMenuPosition - 1] is the selected menu option and ndx
-  MenuOptions[mainMenuOffset + mainMenuPosition - 1].callback_function(); // execute callback function for this menu item
+
+  led2 = !led2;
+  greenLed = !greenLed;
+
+  // This line works... but if the callback function takes too long to execute, and another 
+  // interrupt occurs, we get a microprocessor lockup. 
+  // TODO: We need to move execution of callback function outside of this ISR
+  MenuOptions[mainMenuOffset + mainMenuPosition - 1].callback_function();     // execute callback function for this menu item
 }
 
 // Interrupt for Encoder Rotary Out A/B
@@ -367,26 +373,14 @@ int main()
   DrawMenuFrame();
 
   // load initial Menu items
-  MenuHome_Function();  
-
-  // callbacks for different menu items
-  // MenuOptions[0].callback_function = &MenuOne_Function;
-  // MenuOptions[1].callback_function = &MenuTwo_Function;
-  // MenuOptions[2].callback_function = &MenuThree_Function;
-  // MenuOptions[3].callback_function = &MenuFour_Function;
-  // MenuOptions[4].callback_function = &MenuOne_Function;      
-
-  // these next 2 functions control the logic of the menu display
-  // DisplayMenuOptions(mainMenuOffset);
-  // HighlightMenuOption(mainMenuOffset, mainMenuPosition);
+  MenuHome_Function();
 
   while (true)
   {
     // NOTE: in this main loop, there are no polling being done.
     // Rotary and switch state changes are monitored via interrupts
 
-    // keep blinking led using blocking delay
-    // so we can confirm that Interrupts are working
+    // keep blinking led using blocking delay, so we can confirm that Interrupts are working
     led1 = !led1;
     wait(0.5);
 
