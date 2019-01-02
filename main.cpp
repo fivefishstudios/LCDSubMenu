@@ -10,9 +10,12 @@
 
 using namespace std;
 
+uint8_t MachineState = 0;
+
 uint8_t mainMenuOffset = 0;
 uint8_t mainMenuPosition = 1;
-uint8_t totalMenuCount = sizeof(MenuOptions) / sizeof(MenuOptions_t);
+uint8_t totalMenuCount; 
+
 uint16_t LcdWidth = lcd.GetXSize();
 uint16_t LcdHeight = lcd.GetYSize();
 
@@ -32,7 +35,42 @@ void Do_Nothing()
 
 void MenuOne_Function()
 {
-  lcd.Clear(LCD_COLOR_RED);
+  // Display submenu for Menu Item 0 (AAAA)
+  // To do that, we need to replace the MenuOptions[] array with new items and callback functions 
+  MachineState = 1;
+
+  strcpy(MenuOptions[0].MenuText, "1a SubMenu aaa");
+  MenuOptions[0].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[1].MenuText, "1b SubMenu bbb");
+  MenuOptions[1].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[2].MenuText, "1c SubMenu ccc");
+  MenuOptions[2].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[3].MenuText, "1d SubMenu ddd");
+  MenuOptions[3].callback_function = &Do_Nothing;
+
+  strcpy(MenuOptions[4].MenuText, "< Back to Home");
+  MenuOptions[4].callback_function = &MenuHome_Function;
+
+  // strcpy(MenuOptions[5].MenuText, "6a SubMenu fff");
+  // MenuOptions[5].callback_function = &Do_Nothing;
+
+  // strcpy(MenuOptions[6].MenuText, "7a SubMenu ggg");
+  // MenuOptions[6].callback_function = &Do_Nothing;
+
+  // strcpy(MenuOptions[7].MenuText, "8a Back to Home");
+  // MenuOptions[7].callback_function = &MenuHome_Function;            
+
+  totalMenuCount = 5;
+  mainMenuOffset = 0;
+  mainMenuPosition = 1;  
+
+  // these next 2 functions control the logic of the menu display
+  // DisplayMenuOptions(mainMenuOffset);
+  // HighlightMenuOption(mainMenuOffset, mainMenuPosition);  
+  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
 }
 
 void MenuTwo_Function()
@@ -49,6 +87,39 @@ void MenuFour_Function()
 {
   lcd.Clear(LCD_COLOR_BLUE);
 }
+
+void MenuHome_Function(){
+  MachineState = 0;   // reset machine state
+  // load original home menu items, level 0
+
+  strcpy(MenuOptions[0].MenuText, "1 Menu AAAA    >");
+  MenuOptions[0].callback_function = &MenuOne_Function;
+
+  strcpy(MenuOptions[1].MenuText, "2 Menu BBBB");
+  MenuOptions[1].callback_function = &MenuTwo_Function;
+
+  strcpy(MenuOptions[2].MenuText, "3 Menu CCCC");
+  MenuOptions[2].callback_function = &MenuThree_Function;  
+
+  strcpy(MenuOptions[3].MenuText, "4 Menu DDDD");
+  MenuOptions[3].callback_function = &MenuFour_Function;  
+
+  strcpy(MenuOptions[4].MenuText, "5 Menu EEEE");
+  MenuOptions[4].callback_function = &MenuThree_Function;  
+
+  totalMenuCount = 5;    
+  mainMenuOffset = 0;
+  mainMenuPosition = 1;    
+
+  // these next 2 functions control the logic of the menu display
+  // DisplayMenuOptions(mainMenuOffset);
+  // HighlightMenuOption(mainMenuOffset, mainMenuPosition);
+  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
+
+}
+
+
+
 
 void SwitchHandler()
 {
@@ -101,6 +172,7 @@ void RotaryEncoderHandlerA_assert()
   // UpdateRotaryValue();
   UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
 }
+
 void RotaryEncoderHandlerA_deasserted()
 {
   EncoderOutA_State = 0;
@@ -156,7 +228,7 @@ void InitRotaryEncoder()
 {
   // setup Interrupts for Encoder Switch
   EncoderSwitch.attach_asserted(&SwitchHandler);
-  EncoderSwitch.setSampleFrequency(10000); // Start sampling pb input using interrupts (us)
+  EncoderSwitch.setSampleFrequency(20000); // Start sampling pb input using interrupts (us)
   // setup Interrupts for Encoder Output A/B
   EncoderOutA.attach_asserted(&RotaryEncoderHandlerA_assert);
   EncoderOutA.attach_deasserted(&RotaryEncoderHandlerA_deasserted);
@@ -190,6 +262,12 @@ void DrawMenuFrame()
 {
   lcd.SetTextColor(MENU_FRAME_COLOR);
   lcd.FillRect(0, TITLE_BAR_HEIGHT, LcdWidth, LcdHeight - TITLE_BAR_HEIGHT - STATUS_BAR_HEIGHT);
+}
+
+
+uint8_t GetMenuItemsCount(){
+  uint8_t totalMenuCount = sizeof(MenuOptions) / sizeof(MenuOptions_t);  
+  return totalMenuCount;
 }
 
 void DisplayMenuOptions(uint8_t menuOffset)
@@ -284,20 +362,23 @@ int main()
   InitRotaryEncoder();
   InitLCDScreen();
 
-  // setup callbacks for different menu items
-  MenuOptions[0].callback_function = &MenuOne_Function;
-  MenuOptions[1].callback_function = &MenuTwo_Function;
-  MenuOptions[2].callback_function = &MenuThree_Function;
-  MenuOptions[3].callback_function = &MenuFour_Function;
-  MenuOptions[4].callback_function = &MenuOne_Function;
-
   // draw title bar
   DrawTitleBar(PROGRAM_VERSION);
   DrawMenuFrame();
 
+  // load initial Menu items
+  MenuHome_Function();  
+
+  // callbacks for different menu items
+  // MenuOptions[0].callback_function = &MenuOne_Function;
+  // MenuOptions[1].callback_function = &MenuTwo_Function;
+  // MenuOptions[2].callback_function = &MenuThree_Function;
+  // MenuOptions[3].callback_function = &MenuFour_Function;
+  // MenuOptions[4].callback_function = &MenuOne_Function;      
+
   // these next 2 functions control the logic of the menu display
-  DisplayMenuOptions(mainMenuOffset);
-  HighlightMenuOption(mainMenuOffset, mainMenuPosition);
+  // DisplayMenuOptions(mainMenuOffset);
+  // HighlightMenuOption(mainMenuOffset, mainMenuPosition);
 
   while (true)
   {

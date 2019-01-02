@@ -9,9 +9,11 @@ void DrawMenuFrame();
 void UpdateDisplayMenu(uint8_t menuOffset, uint8_t position);
 void DisplayMenuOptions(uint8_t menuOffset);
 void HighlightMenuOption(uint8_t menuOffset, uint8_t position);
+uint8_t GetMenuItemsCount();
 
 // callbacks for different menu items
 void Do_Nothing();
+void MenuHome_Function();
 void MenuOne_Function();
 void MenuTwo_Function();
 void MenuThree_Function();
@@ -20,7 +22,7 @@ void MenuFour_Function();
 LCD_DISCO_F429ZI lcd;
 char lcdBuffer[20]; // lcd display buffer
 
-#define PROGRAM_VERSION "LCDMenu v0.6"
+#define PROGRAM_VERSION "SubMenu v0.1"
 
 #define TITLE_BAR_HEIGHT 40
 #define TITLE_BAR_COLOR 0xff1253d6
@@ -45,9 +47,10 @@ typedef struct MenuOptions_t
     void (*callback_function)(); // declare function pointer
 };
 
+// initial menu
 static MenuOptions_t MenuOptions[] = {
-    {"1 Menu AAAA", &Do_Nothing},
-    {"2 Menu BBBB", &Do_Nothing},
-    {"3 Menu CCCC", &Do_Nothing},
-    {"4 Menu DDDDD", &Do_Nothing},
-    {"5 Menu EEEE", &Do_Nothing}};
+    {"1 Go Submenu  >", &Do_Nothing},
+    {"2 Menu BBBB",     &Do_Nothing},
+    {"3 Menu CCCC",     &Do_Nothing},
+    {"4 Menu DDDD",     &Do_Nothing},
+    {"5 Menu EEEE",     &Do_Nothing}};
