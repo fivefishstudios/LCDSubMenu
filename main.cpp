@@ -237,7 +237,7 @@ void InitRotaryEncoder()
 {
   // setup Interrupts for Encoder Switch
   EncoderSwitch.attach_asserted(&SwitchHandler);
-  EncoderSwitch.setSampleFrequency(20000); // Start sampling pb input using interrupts (us)
+  EncoderSwitch.setSampleFrequency(30000); // Start sampling pb input using interrupts (us)
   // setup Interrupts for Encoder Output A/B
   EncoderOutA.attach_asserted(&RotaryEncoderHandlerA_assert);
   EncoderOutA.attach_deasserted(&RotaryEncoderHandlerA_deasserted);
@@ -392,8 +392,12 @@ int main()
       UpdateStatusBar("Executing callback...");
       callback_function();
       UpdateStatusBar("Done executing callback...");
+      callback_function = &Do_Nothing;
       executeCallback = false;
     }
+
+    // some quick delay...
+    for (int i=0; i<10000;i++){};
 
     // update status bar with text, again using blocking delay
     // UpdateStatusBar("Hello world!");
