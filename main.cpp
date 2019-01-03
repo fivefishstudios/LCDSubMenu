@@ -10,6 +10,8 @@
 using namespace std;
 
 uint8_t MachineState = 0;
+volatile bool executeCallback = false;   // needs volatile, so the compiler knows this value can change 
+void (*callback_function)();    
 
 uint8_t mainMenuOffset = 0;
 uint8_t mainMenuPosition = 1;
@@ -124,17 +126,18 @@ void MenuHome_Function(){
 
 void SwitchHandler()
 {
-  // if button pressed, we need to determine which menu item is currently highlighted
+  // if button pressed, determine which menu item is currently highlighted
   // then execute a callback function for that menu item
   // MenuOptions[mainMenuOffset + mainMenuPosition - 1] is the selected menu option and ndx
+  
+  greenLed = !greenLed; // just toggle button LED color
 
-  led2 = !led2;
-  greenLed = !greenLed;
+  // we need to avoid long running function inside this ISR (Interrupt Service Routine)
+  // so let's just set some variables and quickly get the fuck out of here
+  executeCallback = true;   // yes, execute callback 
 
-  // This line works... but if the callback function takes too long to execute, and another 
-  // interrupt occurs, we get a microprocessor lockup. 
-  // TODO: We need to move execution of callback function outside of this ISR
-  MenuOptions[mainMenuOffset + mainMenuPosition - 1].callback_function();     // execute callback function for this menu item
+  // which callback to execute? This one!
+  callback_function = MenuOptions[mainMenuOffset + mainMenuPosition - 1].callback_function; 
 }
 
 // Interrupt for Encoder Rotary Out A/B
@@ -381,17 +384,25 @@ int main()
     // Rotary and switch state changes are monitored via interrupts
 
     // keep blinking led using blocking delay, so we can confirm that Interrupts are working
-    led1 = !led1;
-    wait(0.5);
+    // led1 = !led1;
+    // wait(0.1);
+
+    // check if we need to execute anything? 
+    if (executeCallback){
+      UpdateStatusBar("Executing callback...");
+      callback_function();
+      UpdateStatusBar("Done executing callback...");
+      executeCallback = false;
+    }
 
     // update status bar with text, again using blocking delay
-    UpdateStatusBar("Hello world!");
-    wait(1.5);
-    UpdateStatusBar("Sample text here... "); // it just gets truncated
-    wait(1.5);
-    UpdateStatusBar("This can be used to ");
-    wait(1.4);
-    UpdateStatusBar("show status messages.");
-    wait(1.5);
+    // UpdateStatusBar("Hello world!");
+    // wait(1.5);
+    // UpdateStatusBar("Sample text here... "); // it just gets truncated
+    // wait(1.5);
+    // UpdateStatusBar("This can be used to ");
+    // wait(1.4);
+    // UpdateStatusBar("show status messages.");
+    // wait(1.5);
   }
 }

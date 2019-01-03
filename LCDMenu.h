@@ -22,24 +22,24 @@ void MenuFour_Function();
 LCD_DISCO_F429ZI lcd;
 char lcdBuffer[20]; // lcd display buffer
 
-#define PROGRAM_VERSION "SubMenu v0.1"
+#define PROGRAM_VERSION "SubMenu v0.2"
 
 #define TITLE_BAR_HEIGHT 40
-#define TITLE_BAR_COLOR 0xff1253d6
+#define TITLE_BAR_COLOR 0xffff5333
 #define TITLE_BAR_TEXTCOLOR 0xffffffff
 
 #define STATUS_BAR_HEIGHT 30
 #define STATUS_BAR_COLOR 0xff000000
-#define STATUS_BAR_TEXTCOLOR 0xffaaaaaa
+#define STATUS_BAR_TEXTCOLOR 0xffffaaaa
 
-#define MENU_FRAME_COLOR 0xff1f537f
+#define MENU_FRAME_COLOR 0xff2ed32ba
 #define MENU_FRAME_TEXTCOLOR 0xffffffff
 #define MENU_FRAME_LINE_HEIGHT 35
 #define MENU_FRAME_PADDING 10
 
 #define MENU_DISPLAY_COUNT 7
 #define MENU_HIGHLIGHT_TEXTCOLOR 0xffffffff
-#define MENU_HIGHLIGHT_BACKCOLOR 0xffe95431
+#define MENU_HIGHLIGHT_BACKCOLOR 0xff1d328b
 
 typedef struct MenuOptions_t
 {
