@@ -3,6 +3,9 @@
 // Description:
 // Sample program for displaying a multi-layered menu system
 // ------------------------------------------------------------------
+// 01/05/18 SERIOUS BUG: This program sometimes hang randombly... problem traced to callback_function will have some random address... why?
+//  no solution yet...
+// 
 #include "mbed.h"
 #include "LCDMenu.h"
 #include "LCD_DISCO_F429ZI.h"
@@ -37,6 +40,8 @@ void Do_Nothing()
 void MenuOne_Function()
 {
   // Display submenu for Menu Item 0 (AAAA)
+  __disable_irq(); 	// Disable Interrupts
+
   // To do that, we need to replace the MenuOptions[] array with new items and callback functions 
   MachineState = 1;
 
@@ -59,7 +64,7 @@ void MenuOne_Function()
   mainMenuOffset = 0;
   mainMenuPosition = 1;  
 
-  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
+  __enable_irq(); 	// Enable Interrupts
 }
 
 void MenuTwo_Function()
@@ -70,6 +75,8 @@ void MenuTwo_Function()
 void MenuThree_Function()
 {
   // Display submenu for Menu Item 3 (CCCC)
+  __disable_irq(); 	// Disable Interrupts
+
   // To do that, we need to replace the MenuOptions[] array with new items and callback functions 
   MachineState = 3;
 
@@ -89,7 +96,7 @@ void MenuThree_Function()
   mainMenuOffset = 0;
   mainMenuPosition = 1;  
 
-  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
+  __enable_irq(); 	// Enable Interrupts
 }
 
 void MenuFour_Function()
@@ -98,6 +105,8 @@ void MenuFour_Function()
 }
 
 void MenuHome_Function(){
+  __disable_irq(); 	// Disable Interrupts
+  
   MachineState = 0;   // reset machine state
   // load original home menu items, level 0
 
@@ -119,13 +128,14 @@ void MenuHome_Function(){
   totalMenuCount = 5;    
   mainMenuOffset = 0;
   mainMenuPosition = 1;    
-
-  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);
+ 
+  __enable_irq(); 	// Enable Interrupts
 }
 
 
 void SwitchHandler()
 {
+
   // if button pressed, determine which menu item is currently highlighted
   // then execute a callback function for that menu item
   // MenuOptions[mainMenuOffset + mainMenuPosition - 1] is the selected menu option and ndx
@@ -138,6 +148,7 @@ void SwitchHandler()
 
   // which callback to execute? This one!
   callback_function = MenuOptions[mainMenuOffset + mainMenuPosition - 1].callback_function; 
+
 }
 
 // Interrupt for Encoder Rotary Out A/B
@@ -237,14 +248,14 @@ void InitRotaryEncoder()
 {
   // setup Interrupts for Encoder Switch
   EncoderSwitch.attach_asserted(&SwitchHandler);
-  EncoderSwitch.setSampleFrequency(30000); // Start sampling pb input using interrupts (us)
+  EncoderSwitch.setSampleFrequency(20000); // Start sampling pb input using interrupts (us)
   // setup Interrupts for Encoder Output A/B
   EncoderOutA.attach_asserted(&RotaryEncoderHandlerA_assert);
   EncoderOutA.attach_deasserted(&RotaryEncoderHandlerA_deasserted);
-  EncoderOutA.setSampleFrequency(500); // in (us)
+  EncoderOutA.setSampleFrequency(1000); // in (us)
   EncoderOutB.attach_asserted(&RotaryEncoderHandlerB_assert);
   EncoderOutB.attach_deasserted(&RotaryEncoderHandlerB_deasserted);
-  EncoderOutB.setSampleFrequency(500); // in (us)
+  EncoderOutB.setSampleFrequency(1000); // in (us)
 }
 
 void InitLCDScreen()
@@ -366,17 +377,19 @@ void DrawTitleBar(char *Title)
 int main()
 {
   pc.baud(115200);
-  pc.printf("%d menu items \n", totalMenuCount);
 
   InitRotaryEncoder();
   InitLCDScreen();
 
   // draw title bar
   DrawTitleBar(PROGRAM_VERSION);
-  DrawMenuFrame();
+  DrawMenuFrame(); 
 
   // load initial Menu items
   MenuHome_Function();
+  UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);  // initial display of menu items on LCD
+
+  pc.printf("%d menu items \n", totalMenuCount);
 
   while (true)
   {
@@ -390,14 +403,13 @@ int main()
     // check if we need to execute anything? 
     if (executeCallback){
       UpdateStatusBar("Executing callback...");
+      pc.printf("%d callback \n", callback_function);
       callback_function();
+      UpdateDisplayMenu(mainMenuOffset, mainMenuPosition);  // update menu
       UpdateStatusBar("Done executing callback...");
-      callback_function = &Do_Nothing;
+      callback_function = NULL;
       executeCallback = false;
     }
-
-    // some quick delay...
-    for (int i=0; i<10000;i++){};
 
     // update status bar with text, again using blocking delay
     // UpdateStatusBar("Hello world!");
