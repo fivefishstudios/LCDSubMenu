@@ -397,7 +397,7 @@ int main()
     // Rotary and switch state changes are monitored via interrupts
 
     // keep blinking led using blocking delay, so we can confirm that Interrupts are working
-    // led1 = !led1;
+    led1 = !led1;
     // wait(0.1);
 
     // check if we need to execute anything? 

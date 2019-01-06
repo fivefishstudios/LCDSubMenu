@@ -2,9 +2,7 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
-    "name": "make",
-    "isShellCommand": true,
-    "showOutput": "always",
+    "name": "mbed",
     "problemMatcher": {
         "owner": "cpp",
         "fileLocation": ["relative", "${workspaceRoot}/mbed-os"],
@@ -17,12 +15,12 @@
             "message": 5
         }
     },
-    "args": ["-j"],
+    "args" : ["compile", "--profile", "mbed-os/tools/profiles/debug.json", "-f", "-t", "GCC_ARM"], // mbed
     "linux": {
         "command": "make"
     },
     "osx": {
-        "command": "make"
+        "command": "mbed"
     },
     "windows": {
         "command": "make.exe"

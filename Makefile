@@ -1089,13 +1089,14 @@ LINKER_SCRIPT ?= .././mbed-os/targets/TARGET_Freescale/TARGET_MCUXpresso_MCUS/TA
 # Tools and Flags
 
 AS      = arm-none-eabi-gcc
-CC      = arm-none-eabi-gcc
-CPP     = arm-none-eabi-g++
+CC      = arm-none-eabi-gcc 
+CPP     = arm-none-eabi-g++ 
 LD      = arm-none-eabi-gcc
 ELF2BIN = arm-none-eabi-objcopy
 PREPROC = arm-none-eabi-cpp -E -P -Wl,--gc-sections -Wl,--wrap,main -Wl,--wrap,_malloc_r -Wl,--wrap,_free_r -Wl,--wrap,_realloc_r -Wl,--wrap,_memalign_r -Wl,--wrap,_calloc_r -Wl,--wrap,exit -Wl,--wrap,atexit -Wl,-n -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -DMBED_ROM_START=0x0 -DMBED_ROM_SIZE=0x100000 -DMBED_RAM_START=0x20000000 -DMBED_RAM_SIZE=0x30000 -DMBED_RAM1_START=0x1fff0000 -DMBED_RAM1_SIZE=0x10000 -DMBED_BOOT_STACK_SIZE=1024
 
 
+C_FLAGS += -g
 C_FLAGS += -std=gnu99
 C_FLAGS += -include
 C_FLAGS += mbed_config.h
@@ -1192,6 +1193,7 @@ C_FLAGS += -DMBED_RAM_SIZE=0x30000
 C_FLAGS += -DMBED_RAM1_START=0x1fff0000
 C_FLAGS += -DMBED_RAM1_SIZE=0x10000
 
+CXX_FLAGS += -g
 CXX_FLAGS += -std=gnu++98
 CXX_FLAGS += -fno-rtti
 CXX_FLAGS += -Wvla
